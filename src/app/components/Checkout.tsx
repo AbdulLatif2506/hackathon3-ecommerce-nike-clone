@@ -7,7 +7,8 @@ import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
 import { CgChevronRight } from "react-icons/cg";
 import { Product } from "../../../types/products";
-
+import { client } from "@/sanity/lib/client";
+import Swal from "sweetalert2";
 
 export default function Checkout() {
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -67,12 +68,53 @@ export default function Checkout() {
     return Object.values(errors).every((error) => !error);
   };
 
-  const handlePlaceOrder = () => {
-    if (validateForm()) {
+  const handlePlaceOrder = async () => {
+    Swal.fire({
+      title: "Proccessing Your Order",
+      text: "Please wait for a moment",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Proceed",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (validateForm()) {
+          localStorage.removeItem("appliedDiscount");
+          Swal.fire(
+            "Order Placed",
+            "Your order has been placed successfully",
+            "success"
+          );
+        } else {
+          Swal.fire("Error", "Please fill in all the required fields", "error");
+        }
+      }
+    });
+
+    const orderData = {
+      _type: 'order',
+      firstName: formValues.firstName,
+      lastName: formValues.lastName,
+      address: formValues.address,
+      city: formValues.city,
+      zipCode: formValues.zipCode,
+      phone: formValues.phone,
+      email: formValues.email,
+      cartItems: cartItems.map(item => ({
+        _type: "reference",
+        _ref: item._id,
+      })),
+      total: total,
+      discount: discount,
+      orderDate: new Date().toISOString(),
+    };
+
+    try {
+      await client.create(orderData);
       localStorage.removeItem("appliedDiscount");
-    //   toast.success("Order placed successfully!");
-    } else {
-    //   toast.error("Please fill in all the fields.");
+    } catch (error) {
+      console.error("Error Creating Order", error);
     }
   };
 
@@ -173,9 +215,7 @@ export default function Checkout() {
                   className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
                 />
                 {formErrors.lastName && (
-                  <p className="text-sm text-red-500">
-                    Last name is required.
-                  </p>
+                  <p className="text-sm text-red-500">Last name is required.</p>
                 )}
               </div>
             </div>
