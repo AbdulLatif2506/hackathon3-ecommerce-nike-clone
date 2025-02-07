@@ -162,12 +162,12 @@ const Navbar = () => {
             </a>
           </div>
           <div className="px-4 py-2 border-t border-gray-300 space-y-2">
-            <a
-              href="#"
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
-              Find a Store
-            </a>
+              Shop Now
+            </Link>
             <Link
               href="/contact_us"
               className="block text-[14px] font-medium hover:underline"
