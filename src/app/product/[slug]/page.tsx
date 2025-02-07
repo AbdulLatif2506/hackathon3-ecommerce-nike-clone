@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </p>
           <p className="text-[36px] font-medium mt-6">$ {product.price}.00</p>
           <button
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold mt-10 end-10 py-2 px-4 rounded-lg shadow-md hover:shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out"
+                    className="bg-gradient-to-r from-[#444040] to-[#111111] text-white font-semibold mt-10 end-10 py-2 px-4 rounded-lg shadow-md hover:shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out"
                     onClick={(e) => handleAddToCart(e, product)}
                   >
                     Add To Cart

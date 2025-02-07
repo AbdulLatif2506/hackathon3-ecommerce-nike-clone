@@ -1,220 +1,258 @@
-import React from "react";
-import { FiTruck } from "react-icons/fi";
+"use client";
 
-const Checkout = () => {
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { getCartItems } from "@/app/actions/actions";
+import Link from "next/link";
+import { urlFor } from "@/sanity/lib/image";
+import { CgChevronRight } from "react-icons/cg";
+import { Product } from "../../../types/products";
+
+
+export default function Checkout() {
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [discount, setDiscount] = useState<number>(0);
+  const [formValues, setFormValues] = useState({
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    zipCode: "",
+    phone: "",
+    email: "",
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    firstName: false,
+    lastName: false,
+    address: false,
+    city: false,
+    zipCode: false,
+    phone: false,
+    email: false,
+  });
+
+  useEffect(() => {
+    setCartItems(getCartItems());
+    const appliedDiscount = localStorage.getItem("appliedDiscount");
+    if (appliedDiscount) {
+      setDiscount(Number(appliedDiscount));
+    }
+  }, []);
+
+  const subtotal = cartItems.reduce(
+    (total, item) => total + item.price * item.inventory,
+    0
+  );
+  const total = Math.max(subtotal - discount, 0);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues({
+      ...formValues,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const validateForm = () => {
+    const errors = {
+      firstName: !formValues.firstName,
+      lastName: !formValues.lastName,
+      address: !formValues.address,
+      city: !formValues.city,
+      zipCode: !formValues.zipCode,
+      phone: !formValues.phone,
+      email: !formValues.email,
+    };
+    setFormErrors(errors);
+    return Object.values(errors).every((error) => !error);
+  };
+
+  const handlePlaceOrder = () => {
+    if (validateForm()) {
+      localStorage.removeItem("appliedDiscount");
+    //   toast.success("Order placed successfully!");
+    } else {
+    //   toast.error("Please fill in all the fields.");
+    }
+  };
+
   return (
-    <div className="max-w-4xl mb-32 mx-auto p-6 text-[#111111] grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Left Section */}
-      <div>
-        {/* Heading & Info */}
-        <h2 className="text-[21px] font-medium">
-          How would you like to get your order?
-        </h2>
-        <p className="text-[15px] text-[#757575] mt-2">
-          Customs regulation for India require a copy of the recipient's KYC.
-          The address on the KYC needs to match the shipping address. Our
-          courier will contact you via SMS/email to obtain a copy of your KYC.
-          The KYC will be stored securely and used solely for the purpose of
-          clearing customs (including sharing it with customs officials) for all
-          orders and returns. If your KYC does not match your shipping address,
-          please click the link for more information.{" "}
-          <a href="#" className="underline">
-            Learn More
-          </a>
-        </p>
-
-        {/* Delivery Option */}
-        <button className="mt-6 text-[15px] flex items-center gap-5 border-2 border-[#111111] p-6 rounded-lg w-full">
-          <FiTruck className="text-[20px]" /> Deliver it
-        </button>
-
-        {/* Name & Address */}
-        <h3 className="text-[21px] font-medium mt-8">
-          Enter your name and address:
-        </h3>
-        <input
-          type="text"
-          placeholder="First Name"
-          className="w-full border p-4 mt-7 rounded-md"
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          className="w-full border p-4 mt-7 rounded-md"
-        />
-        <input
-          type="text"
-          placeholder="Address Line 1"
-          className="w-full border p-4 mt-7 rounded-md"
-        />
-        <input
-          type="text"
-          placeholder="Address Line 2"
-          className="w-full border p-4 mt-7 rounded-md"
-        />
-        <input
-          type="text"
-          placeholder="Address Line 3"
-          className="w-full border p-4 mt-7 rounded-md"
-        />
-        <div className="flex gap-4 mt-7">
-          <input
-            type="text"
-            placeholder="Postal Code"
-            className="w-1/2 border p-4 rounded-md"
-          />
-          <input
-            type="text"
-            placeholder="Locality"
-            className="w-1/2 border p-4 rounded-md"
-          />
-        </div>
-        <div className="flex gap-4 mt-7">
-          <select className="w-1/2 border p-4 rounded-md">
-            <option>State/Territory</option>
-          </select>
-          <select className="w-1/2 border p-4 rounded-md">
-            <option>India</option>
-          </select>
-        </div>
-        <div className="mt-7">
-          <input type="checkbox" id="save-address" />
-          <label htmlFor="save-address" className="ml-2 text-[15px]">
-            Save this address to my profile
-          </label>
-        </div>
-        <div className="mt-7">
-          <input type="checkbox" id="preferred-address" />
-          <label htmlFor="preferred-address" className="ml-2 text-[15px]">
-            Make this my preferred address
-          </label>
-        </div>
-
-        {/* Contact Info */}
-        <h3 className="text-[21px] font-medium mt-8">
-          What’s your contact information?
-        </h3>
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-4 mt-4 rounded-md"
-        />
-        <p className="text-xs mt-1 pl-4 text-[#757575]">
-          A confirmation email will be sent after checkout.
-        </p>
-        <input
-          type="text"
-          placeholder="Phone Number"
-          className="w-full border p-4 mt-3 rounded-md"
-        />
-        <p className="text-xs mt-1 pl-4 text-[#757575]">
-          A carrier might contact you to confirm delivery.
-        </p>
-
-        {/* PAN Section */}
-        <h3 className="text-[21px] font-medium mt-8">What’s your PAN?</h3>
-        <input
-          type="text"
-          placeholder="PAN"
-          className="w-full border p-4 mt-4 rounded-md"
-        />
-        <p className="text-xs mt-1 pl-4 text-[#757575]">
-          Enter your PAN to enable payment with UPI, Net Banking or local card
-          methods.
-        </p>
-        <div className="mt-2">
-          <input type="checkbox" id="save-pan" />
-          <label htmlFor="save-pan" className="pl-5 text-[11px] text-[#757575]">
-            Save PAN details to Nike Profile
-          </label>
-        </div>
-        <div className="mt-8 leading-tight ">
-          <input type="checkbox" id="consent" />
-          <label
-            htmlFor="consent"
-            className="pl-5 text-[12px] text-[#757575]  "
-          >
-            I have read and consent to shipworld processing my information in
-            accordance with the{" "}
-            <a href="#" className="underline">
-              Privacy Statement
-            </a>{" "}
-            and{" "}
-            <a href="#" className="underline">
-              Cookie Policy
-            </a>
-            .
-          </label>
-        </div>
-
-        {/* Continue Button */}
-        <button className="mt-16 bg-[#F5F5F5] text-[#757575] text-[15px] font-medium w-full py-4 rounded-full">
-          Continue
-        </button>
-
-        <div className="mt-7 border-t">
-          <h3 className="text-[21px] font-medium mt-4">Delivery</h3>
-          <p className="text-[21px] text-[#757575] font-medium mt-8 pt-3 border-t">
-            Shipping
-          </p>
-          <p className="text-[21px] text-[#757575] font-medium mt-8 pt-3 border-t">
-            Billing
-          </p>
-          <p className="text-[21px] text-[#757575] font-medium mt-8 pt-3 border-t">
-            Payement
-          </p>
+    <div className={`min-h-screen bg-[#FFFFFF]`}>
+      {/* Breadcrumb */}
+      <div className="mt-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center gap-2 py-4">
+            <Link
+              href="/cart"
+              className="text-[#666666] hover:text-black transition text-sm"
+            >
+              Cart
+            </Link>
+            <CgChevronRight className="w-4 h-4 text-[#666666]" />
+            <span className="text-sm">Checkout</span>
+          </nav>
         </div>
       </div>
 
-      {/* Right Section - Order Summary */}
-      <div className="px-10">
-        <h3 className="text-[21px] font-medium">Order Summary</h3>
-        <p className="flex text-[#757575] text-[15px] justify-between mt-4">
-          <span>Subtotal</span>
-          <span>₹ 20,890.00</span>
-        </p>
-        <p className="flex text-[#757575] text-[15px] justify-between mt-2">
-          <span>Delivery/Shipping</span>
-          <span>Free</span>
-        </p>
-        <hr className="my-4" />
-        <p className="flex justify-between font-medium text-[15px]">
-          <span>Total</span>
-          <span>₹ 20,890.00</span>
-        </p>
-        <hr className="my-4" />
-        <p className="text-[9px] text-[#111111]">
-          (The total reflects the price of your order, including all duties and
-          taxes)
-        </p>
-        <h3 className="text-[15px] font-bold mt-4">
-          Arrives Mon, 27 Mar - Wed, 12 Apr
-        </h3>
-        <div className="mt-4 flex flex-col md:flex-row gap-3">
-          <img src="/images/ultra.png" alt="" width="208px" />
-          <div className="flex flex-col">
-            <p className="text-[14px] leading-6">
-              Nike Dri-FIT ADV TechKnit Ultra Men's Short-Sleeve Running Top
-            </p>
-            <p className="text-[#8D8D8D] text-[14px]">
-              Qty 1 <br /> Size L <br /> ₹ 3,895.00
-            </p>
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Order Summary */}
+          <div className="bg-[#FFFFFF] border rounded-lg shadow-md p-6 space-y-4">
+            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            {cartItems.length > 0 ? (
+              cartItems.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex items-center gap-4 py-3 border-b"
+                >
+                  <div className="w-16 h-16 rounded overflow-hidden">
+                    {item.image && (
+                      <Image
+                        src={urlFor(item.image).url()}
+                        alt={item.productName}
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium">{item.productName}</h3>
+                    <p className="text-xs text-gray-500">
+                      Quantity: {item.inventory}
+                    </p>
+                  </div>
+                  <p className="text-sm font-medium">
+                    ${item.price * item.inventory}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">Your cart is empty.</p>
+            )}
+            <div className="text-right pt-4">
+              <p className="text-sm">
+                Subtotal: <span className="font-medium">${subtotal}</span>
+              </p>
+              <p className="text-sm">
+                Discount: <span className="font-medium">-${discount}</span>
+              </p>
+              <p className="text-lg font-semibold">
+                Total: ${total.toFixed(2)}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="mt-4 flex flex-col md:flex-row gap-3">
-          <img src="/images/max_97.png" alt="" width="208px" />
-          <div className="flex flex-col">
-            <p className="text-[14px] leading-6">
-            Nike Air Max 97 SE Men's Shoes
-            </p>
-            <p className="text-[#8D8D8D] text-[14px]">
-              Qty 1 <br /> Size UK 8 <br /> ₹ 16,995.00
-            </p>
+
+          {/* Billing Form */}
+          <div className="bg-[#FFFFFF] border rounded-lg shadow-md p-6 space-y-6">
+            <h2 className="text-xl font-semibold">Billing Information</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14px]">
+              <div>
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  id="firstName"
+                  placeholder="Enter your first name"
+                  value={formValues.firstName}
+                  onChange={handleInputChange}
+                  className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black "
+                />
+                {formErrors.firstName && (
+                  <p className="text-sm text-red-500">
+                    First name is required.
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="lastName">Last Name </label>
+                <input
+                  id="lastName"
+                  placeholder="Enter your last name"
+                  value={formValues.lastName}
+                  onChange={handleInputChange}
+                  className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+                />
+                {formErrors.lastName && (
+                  <p className="text-sm text-red-500">
+                    Last name is required.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div>
+              <label htmlFor="address">Address </label>
+              <input
+                id="address"
+                placeholder="Enter your address"
+                value={formValues.address}
+                onChange={handleInputChange}
+                className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+              />
+              {formErrors.address && (
+                <p className="text-sm text-red-500">Address is required.</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="city">City</label>
+              <input
+                id="city"
+                placeholder="Enter your city"
+                value={formValues.city}
+                onChange={handleInputChange}
+                className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+              />
+              {formErrors.city && (
+                <p className="text-sm text-red-500">City is required.</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="zipCode">Zip Code</label>
+              <input
+                id="zipCode"
+                placeholder="Enter your zip code"
+                value={formValues.zipCode}
+                onChange={handleInputChange}
+                className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+              />
+              {formErrors.zipCode && (
+                <p className="text-sm text-red-500">Zip Code is required.</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="phone">Phone</label>
+              <input
+                id="phone"
+                placeholder="Enter your phone number"
+                value={formValues.phone}
+                onChange={handleInputChange}
+                className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+              />
+              {formErrors.phone && (
+                <p className="text-sm text-red-500">Phone is required.</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                placeholder="Enter your email address"
+                value={formValues.email}
+                onChange={handleInputChange}
+                className="border border-[#E5E5E5] w-full px-4 py-2 rounded-[4px] mb-3 focus:outline-none focus:ring-2 focus:ring-black  "
+              />
+              {formErrors.email && (
+                <p className="text-sm text-red-500">Email is required.</p>
+              )}
+            </div>
+            <button
+              className="mt-4 w-full bg-gradient-to-r from-[#444040] to-[#111111] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out"
+              onClick={handlePlaceOrder}
+            >
+              Place Order
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Checkout;
+}

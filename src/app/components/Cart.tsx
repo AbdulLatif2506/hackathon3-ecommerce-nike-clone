@@ -1,10 +1,15 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Product } from "../../../types/products";
-import { getCartItems, removeFromCart, updateCartQuantity } from "../actions/actions";
+import {
+  getCartItems,
+  removeFromCart,
+  updateCartQuantity,
+} from "../actions/actions";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { urlFor } from "@/sanity/lib/image";
+import { useRouter } from "next/navigation";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -43,12 +48,18 @@ const Cart = () => {
 
   const handleDecrement = (id: string) => {
     const product = cartItems.find((item) => item._id === id);
-    if (product && product.inventory > 1) handleQuantityChange(id, product.inventory - 1);
+    if (product && product.inventory > 1)
+      handleQuantityChange(id, product.inventory - 1);
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.inventory, 0);
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.inventory,
+      0
+    );
   };
+
+  const router = useRouter();
 
   const handleProceed = () => {
     Swal.fire({
@@ -62,6 +73,7 @@ const Cart = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire("Success", "Your order has been placed!", "success");
+        router.push('/checkout')
         setCartItems([]);
       }
     });
@@ -73,7 +85,10 @@ const Cart = () => {
       <div className="space-y-6">
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
-            <div key={item._id} className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-lg shadow-md">
+            <div
+              key={item._id}
+              className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-lg shadow-md"
+            >
               <div className="flex items-center space-x-4">
                 {item.image && (
                   <Image
@@ -87,7 +102,9 @@ const Cart = () => {
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold">{item.productName}</h3>
                   <p className="text-sm text-[#757575]">{item.category}</p>
-                  <p className="text-md font-semibold text-[#757575]">Price: ${item.price}</p>
+                  <p className="text-md font-semibold text-[#757575]">
+                    Price: ${item.price}
+                  </p>
                   <div className="flex items-center space-x-2 mt-2">
                     <button
                       onClick={() => handleDecrement(item._id)}
@@ -95,7 +112,9 @@ const Cart = () => {
                     >
                       -
                     </button>
-                    <span className="px-4 py-1 bg-gray-200 rounded-md">{item.inventory}</span>
+                    <span className="px-4 py-1 bg-gray-200 rounded-md">
+                      {item.inventory}
+                    </span>
                     <button
                       onClick={() => handleIncrement(item._id)}
                       className="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
@@ -126,7 +145,7 @@ const Cart = () => {
           </div>
           <button
             onClick={handleProceed}
-            className="mt-6 bg-[#111111] text-[#FFFFFF] text-lg font-medium w-full py-3 rounded-lg hover:bg-[#8D8D8D]"
+            className="mt-6 bg-gradient-to-r from-[#444040] to-[#111111] text-white font-semibold hover:shadow-lg transition-transform duration-300 ease-in-out w-full py-3 rounded-lg hover:bg-[#8D8D8D]"
           >
             Proceed to Checkout
           </button>

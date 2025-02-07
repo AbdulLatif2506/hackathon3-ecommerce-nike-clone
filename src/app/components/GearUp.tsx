@@ -1,149 +1,87 @@
 "use client"; // To use React hooks in a Client Component
 import React, { useState, useEffect } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import Card from "./Card";
-
-interface Clothing {
-  id: number;
-  image: string;
-  title: string;
-  price: number;
-  category: string;
-}
-
-const clothing: Clothing[] = [
-  {
-    id: 1,
-    image: "/images/ultra.png",
-    title: "Nike Dri-FIT ADV TechKnit Ultra",
-    category: "Men's Short-Sleeve Running Top",
-    price: 3895,
-  },
-  {
-    id: 2,
-    image: "/images/challenger.png",
-    title: "Nike Dri-FIT Challenger",
-    category: "Men's 18cm (approx.) 2-in-1 Versatile Shorts",
-    price: 2495,
-  },
-  {
-    id: 3,
-    image: "/images/division.png",
-    title: "Nike Dri-FIT ADV Run Division",
-    category: "Women's Long-Sleeve Running Top",
-    price: 5295,
-  },
-  {
-    id: 4,
-    image: "/images/fast.png",
-    title: "Nike Fast",
-    category: "Women's Mid-Rise 7/8 Running Leggings with Pockets",
-    price: 3795,
-  },
-  {
-    id: 5,
-    image: "/images/ultra.png",
-    title: "Nike Dri-FIT ADV TechKnit Ultra",
-    category: "Men's Short-Sleeve Running Top",
-    price: 3895,
-  },
-  {
-    id: 6,
-    image: "/images/challenger.png",
-    title: "Nike Dri-FIT Challenger",
-    category: "Men's 18cm (approx.) 2-in-1 Versatile Shorts",
-    price: 2495,
-  },
-];
+import { Product } from "../../../types/products";
+import { client } from "@/sanity/lib/client";
+import { allProducts, gearUp, latest } from "@/sanity/lib/queries";
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
+import Link from "next/link";
+import { addToCart } from "../actions/actions";
+import Swal from "sweetalert2";
 
 const GearUp = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleItems, setVisibleItems] = useState(3); // Default to 3 items for large screens
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // Update visible items based on screen size
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setVisibleItems(3); // Large screens
-      } else if (window.innerWidth >= 768) {
-        setVisibleItems(2); // Tablets
-      } else {
-        setVisibleItems(1); // Mobile
-      }
-    };
-    handleResize(); // Set initial value
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    async function fetchProduct() {
+      const fetchedProduct: Product[] = await client.fetch(gearUp);
+      setProducts(fetchedProduct);
+    }
+    fetchProduct();
   }, []);
 
-  // Next Slide
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex + visibleItems >= clothing.length ? 0 : prevIndex + visibleItems
-    );
-  };
-
-  // Previous Slide
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0
-        ? clothing.length - visibleItems
-        : prevIndex - visibleItems
-    );
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    Swal.fire({
+      // position: "top-right",
+      icon: "success",
+      title: `${product.productName} Added to Cart`,
+      showConfirmButton: false,
+      timer: 1000,
+    });
+    addToCart(product);
   };
 
   return (
-    <div className="relative w-full bg-white mt-[3em]">
-      {/* Header with Arrow Buttons */}
-      <div className="flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-[22px] font-medium">Gear Up</h2>
-        <div className="flex gap-2">
-          <button
-            className="bg-white text-black border border-black rounded-full p-2 hover:bg-black hover:text-white transition"
-            onClick={prevSlide}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-28 ">
+        {products.map((product) => (
+          <div
+            key={product._id}
+            className="border rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200 w-full flex flex-col h-full"
           >
-            <FiChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            className="bg-white text-black border border-black rounded-full p-2 hover:bg-black hover:text-white transition"
-            onClick={nextSlide}
-          >
-            <FiChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Shoe Cards */}
-      <div className="overflow-hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          className="flex gap-4 transition-transform duration-500 ease-in-out"
-          style={{
-            transform: `translateX(-${currentIndex * (100 / visibleItems)}%)`,
-          }}
-        >
-          {clothing.map((clothe) => (
-            <div
-              key={clothe.id}
-              className={`w-full ${
-                visibleItems === 1
-                  ? "flex-[1_0_100%]"
-                  : visibleItems === 2
-                  ? "flex-[1_0_50%]"
-                  : "flex-[1_0_33.33%]"
-              }`}
+            <Link
+              href={`/product/${product.slug.current}`}
+              className="flex flex-col h-full"
             >
-              <Card
-                image={clothe.image}
-                title={clothe.title}
-                category={clothe.category}
-                price={clothe.price}
-              />
-            </div>
-          ))}
-        </div>
+              {product.image && (
+                <Image
+                  src={urlFor(product.image).url()}
+                  alt={product.productName}
+                  width={300}
+                  height={300}
+                  className="w-full h-auto sm:h-48 lg:h-auto object-cover  mb-4"
+                />
+              )}
+              <div className="w-full flex flex-col flex-grow justify-between">
+                <div className="grid grid-cols-3 items-start gap-2 mb-2">
+                  <h3 className="font-medium col-span-2 break-words text-[15px]">
+                    {product.productName}
+                  </h3>
+                  <p className="text-[15px] text-right text-[#757575]">
+                    {product.price
+                      ? `$${product.price}`
+                      : "Price Not Available"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[15px] text-[#757575] w-full">
+                    {product.category}
+                  </p>
+
+                  <button
+                    className="mt-4 w-full bg-gradient-to-r from-[#444040] to-[#111111] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg hover:scale-110 transition-transform duration-300 ease-in-out"
+                    onClick={(e) => handleAddToCart(e, product)}
+                  >
+                    Add To Cart
+                  </button>
+                </div>
+              </div>
+            </Link>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
-
 export default GearUp;

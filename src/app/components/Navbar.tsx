@@ -33,8 +33,8 @@ const Navbar = () => {
           />
 
           <div className="hidden sm:flex items-center space-x-4 text-[11px] font-medium">
-            <Link href="#" className="hover:underline">
-              Find a Store
+            <Link href="/all_products" className="hover:underline">
+              Shop Now
             </Link>
             <span>|</span>
             <Link href="/contact_us" className="hover:underline">
