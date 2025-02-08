@@ -64,24 +64,24 @@ const Navbar = () => {
         </Link>
         {/* Center Navigation for Desktop */}
         <nav className="hidden lg:flex space-x-6 text-black text-[16px] font-medium">
-          <a href="#" className="hover:underline">
+          <Link href="/all_products" className="hover:underline">
             New & Featured
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/all_products" className="hover:underline">
             Men
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/all_products" className="hover:underline">
             Women
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/all_products" className="hover:underline">
             Kids
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/all_products" className="hover:underline">
             Sale
-          </a>
-          <a href="#" className="hover:underline">
+          </Link>
+          <Link href="/all_products" className="hover:underline">
             SNKRS
-          </a>
+          </Link>
         </nav>
 
         {/* Right Side with Icons */}
@@ -124,42 +124,42 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-300">
           <div className="px-4 py-2 space-y-2">
-            <a
-              href="#"
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               New & Featured
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               Men
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               Women
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               Kids
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               Sale
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/all_products"
               className="block text-[14px] font-medium hover:underline"
             >
               SNKRS
-            </a>
+            </Link>
           </div>
           <div className="px-4 py-2 border-t border-gray-300 space-y-2">
             <Link
